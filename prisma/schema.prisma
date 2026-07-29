@@ -1,0 +1,217 @@
+// Champlain Valley Cleaning — data model
+// SQLite for local dev. Swap `provider` to "postgresql" for deployment;
+// no model changes are required.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// Staff who can sign in to /admin.
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         String    @default("owner") // owner | staff
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  sessions Session[]
+  notes    LeadNote[]
+
+  @@map("admin_users")
+}
+
+/// Server-side sessions. Revocable, unlike a stateless JWT.
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// A service the company sells. Fully editable from the admin.
+model Service {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  blurb       String // one-line summary for cards
+  description String // long copy for the detail section
+  category    String  @default("commercial") // commercial | residential | specialty
+  icon        String  @default("sparkle")
+  priceFrom   Int? // in whole dollars; null = "quote only"
+  priceUnit   String  @default("visit") // visit | hour | sqft | month
+  features    String  @default("[]") // JSON array of strings
+  featured    Boolean @default(false)
+  active      Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+
+  @@index([active, sortOrder])
+  @@map("services")
+}
+
+/// An inbound quote request. The main thing the owner cares about.
+model Lead {
+  id           String  @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  company      String?
+  propertyType String  @default("commercial") // commercial | residential
+  serviceSlug  String?
+  squareFeet   Int?
+  frequency    String? // one-time | weekly | biweekly | monthly
+  message      String?
+  preferredDate String?
+
+  status   String @default("new") // new | contacted | quoted | won | lost
+  priority String @default("normal") // low | normal | high
+  source   String @default("website") // website | chatbot | phone | facebook | referral
+
+  quotedAmount Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notes    LeadNote[]
+  bookings Booking[]
+
+  @@index([status, createdAt])
+  @@map("leads")
+}
+
+/// Free-text activity log against a lead.
+model LeadNote {
+  id       String   @id @default(cuid())
+  leadId   String
+  authorId String?
+  body     String
+  createdAt DateTime @default(now())
+
+  lead   Lead       @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  author AdminUser? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([leadId, createdAt])
+  @@map("lead_notes")
+}
+
+/// A scheduled job on the calendar.
+model Booking {
+  id           String   @id @default(cuid())
+  leadId       String?
+  serviceId    String?
+  customerName String
+  email        String?
+  phone        String?
+  address      String?
+  scheduledFor DateTime
+  durationMin  Int      @default(120)
+  status       String   @default("pending") // pending | confirmed | completed | cancelled
+  price        Int?
+  crew         String?
+  notes        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lead    Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([scheduledFor])
+  @@index([status])
+  @@map("bookings")
+}
+
+/// A customer quote shown on the site.
+model Testimonial {
+  id        String  @id @default(cuid())
+  author    String
+  role      String?
+  location  String?
+  quote     String
+  rating    Int     @default(5)
+  published Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+  @@map("testimonials")
+}
+
+/// A photo. Seeded from the client's Facebook page; curated in the admin.
+model GalleryItem {
+  id        String  @id @default(cuid())
+  filename  String  @unique
+  title     String
+  caption   String?
+  category  String  @default("work") // work | equipment | team | place
+  width     Int
+  height    Int
+  published Boolean @default(false)
+  featured  Boolean @default(false)
+  sortOrder Int     @default(0)
+  sourceUrl String? // original Facebook permalink
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, sortOrder])
+  @@map("gallery_items")
+}
+
+/// Editable key/value site copy and config.
+model SiteSetting {
+  key       String   @id
+  value     String
+  label     String
+  group     String   @default("general") // general | contact | seo | hero
+  type      String   @default("text") // text | textarea | boolean | number
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+/// A chatbot conversation. The UI is built; the LLM is intentionally not wired.
+model Conversation {
+  id        String   @id @default(cuid())
+  visitorId String
+  leadId    String?
+  status    String   @default("open") // open | closed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages ChatMessage[]
+
+  @@index([createdAt])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String // visitor | assistant | staff
+  body           String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}

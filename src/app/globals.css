@@ -1,0 +1,257 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Champlain Valley Cleaning — Design System
+   Brand: trustworthy, local, crisp, Vermont.
+   Palette is drawn from Lake Champlain (blue) and the Green
+   Mountains (pine), on a warm paper neutral.
+   ============================================================ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* --- Brand: Lake (primary) --------------------------------- */
+  --color-lake-50: #eff9fc;
+  --color-lake-100: #d7f0f8;
+  --color-lake-200: #b4e2f1;
+  --color-lake-300: #7fcde6;
+  --color-lake-400: #43aed4;
+  --color-lake-500: #2191ba;
+  --color-lake-600: #1d749d;
+  --color-lake-700: #1d5e80;
+  --color-lake-800: #1f4f6a;
+  --color-lake-900: #1e435a;
+  --color-lake-950: #0e2a3c;
+
+  /* --- Brand: Pine (accent) ---------------------------------- */
+  --color-pine-50: #f0faf3;
+  --color-pine-100: #daf2e1;
+  --color-pine-200: #b5e4c5;
+  --color-pine-300: #8ad0a3;
+  --color-pine-400: #52b67d;
+  --color-pine-500: #2f9a5f;
+  --color-pine-600: #1f7d4b;
+  --color-pine-700: #1b643e;
+  --color-pine-800: #1a5034;
+  --color-pine-900: #17422d;
+  --color-pine-950: #0a2418;
+
+  /* --- Neutral: warm paper ----------------------------------- */
+  --color-stone-25: #fcfcfb;
+  --color-stone-50: #f7f7f5;
+  --color-stone-100: #efefec;
+  --color-stone-200: #e2e2dd;
+  --color-stone-300: #cbcbc3;
+  --color-stone-400: #a3a39a;
+  --color-stone-500: #82827a;
+  --color-stone-600: #676760;
+  --color-stone-700: #54544f;
+  --color-stone-800: #3a3a37;
+  --color-stone-900: #262624;
+  --color-stone-950: #171716;
+
+  /* --- Typography -------------------------------------------- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+
+  /* Fluid display sizes */
+  --text-display: clamp(2.5rem, 1.6rem + 4vw, 4.5rem);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.035em;
+  --text-headline: clamp(1.875rem, 1.3rem + 2.4vw, 3rem);
+  --text-headline--line-height: 1.1;
+  --text-headline--letter-spacing: -0.025em;
+
+  /* --- Radius ------------------------------------------------- */
+  --radius-card: 0.875rem;
+  --radius-field: 0.625rem;
+
+  /* --- Elevation ---------------------------------------------- */
+  --shadow-e1: 0 1px 2px 0 rgb(14 42 60 / 0.06), 0 1px 3px 0 rgb(14 42 60 / 0.05);
+  --shadow-e2: 0 2px 4px -2px rgb(14 42 60 / 0.08), 0 4px 12px -2px rgb(14 42 60 / 0.08);
+  --shadow-e3: 0 8px 24px -6px rgb(14 42 60 / 0.14), 0 2px 6px -2px rgb(14 42 60 / 0.08);
+
+  /* --- Motion -------------------------------------------------- */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ============================================================
+   Semantic layer — flips between light and dark
+   ============================================================ */
+
+:root {
+  --bg: var(--color-stone-25);
+  --bg-sunken: var(--color-stone-100);
+  --surface: #ffffff;
+  --surface-2: var(--color-stone-50);
+  --border: var(--color-stone-200);
+  --border-strong: var(--color-stone-300);
+  --text: var(--color-stone-900);
+  --text-muted: var(--color-stone-600);
+  --text-subtle: var(--color-stone-500);
+  --brand: var(--color-lake-700);
+  --brand-hover: var(--color-lake-800);
+  --on-brand: #ffffff;
+  --ring: var(--color-lake-500);
+}
+
+.dark {
+  --bg: #0d1418;
+  --bg-sunken: #080d10;
+  --surface: #141e24;
+  --surface-2: #1b272e;
+  --border: #26353d;
+  --border-strong: #35474f;
+  --text: var(--color-stone-100);
+  --text-muted: #9aa8ae;
+  --text-subtle: #7b898f;
+  --brand: var(--color-lake-300);
+  --brand-hover: var(--color-lake-200);
+  --on-brand: var(--color-lake-950);
+  --ring: var(--color-lake-400);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-sunken: var(--bg-sunken);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border-base: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-on-brand: var(--on-brand);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-lake-200);
+    color: var(--color-lake-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+
+@utility container-page {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+}
+
+/* Dawn sky behind the hero mountain scene */
+@utility bg-sky-valley {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-lake-100) 70%, var(--bg)) 0%,
+    color-mix(in oklab, var(--color-lake-50) 55%, var(--bg)) 38%,
+    var(--bg) 72%
+  );
+}
+
+.dark .bg-sky-valley,
+:root[data-theme="dark"] .bg-sky-valley {
+  background-image: linear-gradient(
+    to bottom,
+    #0a1a22 0%,
+    #0c1a1e 42%,
+    var(--bg) 78%
+  );
+}
+
+/* Subtle topographic wash used behind hero / CTA bands */
+@utility bg-topo {
+  background-image:
+    radial-gradient(60rem 30rem at 15% -10%, color-mix(in oklab, var(--color-lake-400) 22%, transparent), transparent 70%),
+    radial-gradient(45rem 28rem at 92% 8%, color-mix(in oklab, var(--color-pine-400) 16%, transparent), transparent 70%);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility animate-rise {
+  animation: rise 0.6s var(--ease-out-soft) both;
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
