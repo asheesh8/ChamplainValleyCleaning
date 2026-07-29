@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { AdminNav } from "@/components/admin/AdminNav";
@@ -12,10 +11,10 @@ export const metadata = {
 export default async function DashLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/admin/login");
-
-  const newLeads = await prisma.lead.count({ where: { status: "new" } });
+  const [user, newLeads] = await Promise.all([
+    getCurrentUser(),
+    prisma.lead.count({ where: { status: "new" } }).catch(() => 0),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col bg-bg-sunken lg:flex-row">

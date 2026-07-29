@@ -316,7 +316,7 @@ const settings = [
 
 async function main() {
   const email = process.env.ADMIN_EMAIL ?? "owner@champlainvalleycleaning.com";
-  const password = process.env.ADMIN_PASSWORD ?? "cvc-admin-2026";
+  const placeholderPassword = "admin-login-disabled";
 
   const admin = await prisma.adminUser.upsert({
     where: { email },
@@ -324,7 +324,7 @@ async function main() {
     create: {
       email,
       name: "CVC Owner",
-      passwordHash: hashPassword(password),
+      passwordHash: hashPassword(placeholderPassword),
       role: "owner",
     },
   });
@@ -415,9 +415,7 @@ async function main() {
   }
   console.log(`✓ leads       ${sampleLeads.length} sample records (source="sample")`);
 
-  console.log("\nSign in at /admin/login");
-  console.log(`  email:    ${email}`);
-  console.log(`  password: ${password}\n`);
+  console.log("\nAdmin preview is open at /admin — no login required.\n");
 }
 
 main()

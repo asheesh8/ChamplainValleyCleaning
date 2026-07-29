@@ -6,7 +6,6 @@ import { useState } from "react";
 import { LogoMark } from "@/components/site/Logo";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { Icon } from "@/components/ui/Icon";
-import { logoutAction } from "@/app/admin/actions";
 import { cn } from "@/lib/utils";
 
 const links = [
@@ -91,7 +90,6 @@ export function AdminNav({
       {open && (
         <div className="border-b border-border-base bg-surface p-4 lg:hidden">
           {nav}
-          <LogoutButton />
         </div>
       )}
 
@@ -131,24 +129,8 @@ export function AdminNav({
             </div>
             <ThemeToggle />
           </div>
-
-          <LogoutButton />
         </div>
       </aside>
     </>
-  );
-}
-
-function LogoutButton() {
-  return (
-    <form action={logoutAction} className="mt-1">
-      <button
-        type="submit"
-        className="flex w-full items-center gap-3 rounded-field px-3 py-2 text-sm text-text-muted transition-colors hover:bg-surface-2 hover:text-text"
-      >
-        <Icon name="logout" className="size-[1.15rem]" />
-        Sign out
-      </button>
-    </form>
   );
 }

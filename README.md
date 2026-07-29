@@ -14,8 +14,7 @@ npm install && npx prisma migrate dev && npx tsx prisma/seed.ts && npm run dev
 
 Site: <http://localhost:3000> · Admin: <http://localhost:3000/admin>
 
-The seed script prints the admin credentials it created. Override them with
-`ADMIN_EMAIL` / `ADMIN_PASSWORD` before seeding.
+Admin opens directly during this preview build; no login or password is required yet.
 
 ---
 
@@ -41,13 +40,12 @@ amount and internal notes) · Schedule · Services (full CRUD) · Gallery
 ### Backend
 
 - `POST /api/leads` — public quote submission. Zod-validated, honeypot-protected.
-- `GET /api/leads` — admin only, session-guarded.
+- `GET /api/leads` — admin lead list.
 - `POST /api/chat` — **stub, returns 501.** See below.
-- Admin mutations are Server Actions in `src/app/admin/actions.ts`, each gated
-  by `requireUser()`.
+- Admin mutations are Server Actions in `src/app/admin/actions.ts`.
 
-Auth is a server-side session table plus an httpOnly cookie; passwords use
-scrypt with per-password salts. Sessions are revocable, unlike a stateless JWT.
+Admin auth is intentionally disabled for the current preview. Re-enable it before
+sharing the admin URL outside the launch team.
 
 ---
 
@@ -90,7 +88,7 @@ unreviewed is imported but hidden. Curate it in Admin → Gallery.
 2. **Swap SQLite for Postgres.** Change `provider` in `prisma/schema.prisma`
    and set `DATABASE_URL`. No model changes needed — but SQLite will not work
    on a serverless host.
-3. **Set a real `SESSION_SECRET`** and change the seeded admin password.
+3. **Re-enable admin authentication** before sharing the admin URL publicly.
 4. **Confirm the placeholders** in `src/lib/site.ts`. Opening hours and the
    2020 founding year are assumptions, not verified facts.
 5. **Replace the testimonial placeholders.** Three unpublished template rows

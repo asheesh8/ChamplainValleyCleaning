@@ -3,17 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import {
-  createSession,
-  destroySession,
-  requireUser,
-  verifyPassword,
-} from "@/lib/auth";
+import { destroySession, requireUser } from "@/lib/auth";
 import {
   bookingSchema,
   galleryUpdateSchema,
   leadUpdateSchema,
-  loginSchema,
   serviceSchema,
   testimonialSchema,
 } from "@/lib/validation";
@@ -22,35 +16,13 @@ export type ActionState = { error?: string; ok?: boolean };
 
 // ---------------------------------------------------------------- auth
 
-export async function loginAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-
-  if (!parsed.success) {
-    return { error: "Enter a valid email and password." };
-  }
-
-  const user = await prisma.adminUser.findUnique({
-    where: { email: parsed.data.email.toLowerCase().trim() },
-  });
-
-  // Same message either way so the form can't be used to enumerate accounts.
-  if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
-    return { error: "Those credentials don't match an account." };
-  }
-
-  await createSession(user.id);
+export async function loginAction(): Promise<ActionState> {
   redirect("/admin");
 }
 
 export async function logoutAction() {
   await destroySession();
-  redirect("/admin/login");
+  redirect("/admin");
 }
 
 // ---------------------------------------------------------------- leads
@@ -80,13 +52,13 @@ export async function updateLeadAction(formData: FormData) {
 }
 
 export async function addLeadNoteAction(formData: FormData) {
-  const user = await requireUser();
+  await requireUser();
   const leadId = String(formData.get("leadId"));
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
 
   await prisma.leadNote.create({
-    data: { leadId, body, authorId: user.id },
+    data: { leadId, body },
   });
   revalidatePath(`/admin/leads/${leadId}`);
 }

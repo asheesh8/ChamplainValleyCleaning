@@ -105,10 +105,5 @@ export const galleryUpdateSchema = z.object({
   sortOrder: z.coerce.number().int().optional(),
 });
 
-export const loginSchema = z.object({
-  email: z.email("Enter a valid email"),
-  password: z.string().min(1, "Enter your password"),
-});
-
 export type LeadCreateInput = z.infer<typeof leadCreateSchema>;
 export type ServiceInput = z.infer<typeof serviceSchema>;
