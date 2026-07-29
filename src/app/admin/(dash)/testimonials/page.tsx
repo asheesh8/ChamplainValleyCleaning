@@ -7,16 +7,14 @@ import {
   deleteTestimonialAction,
   saveTestimonialAction,
 } from "@/app/admin/actions";
-import { prisma } from "@/lib/db";
+import { getAdminTestimonials } from "@/lib/admin-data";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Reviews" };
 
 export default async function AdminTestimonialsPage() {
-  const testimonials = await prisma.testimonial.findMany({
-    orderBy: [{ published: "desc" }, { sortOrder: "asc" }],
-  });
+  const testimonials = await getAdminTestimonials();
 
   const placeholders = testimonials.filter((t) => t.id.startsWith("placeholder-"));
 

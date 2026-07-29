@@ -3,7 +3,7 @@ import { PageHeader, Panel, StatCard, EmptyState, Th, Td } from "@/components/ad
 import { Badge, statusTone } from "@/components/ui/Badge";
 import { Icon } from "@/components/ui/Icon";
 import { ButtonLink } from "@/components/ui/Button";
-import { prisma } from "@/lib/db";
+import { getAdminDashboardData } from "@/lib/admin-data";
 import { formatCurrency, formatDate, relativeTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 864e5);
-
-  const [
+  const {
     totalLeads,
     newLeads,
     wonLeads,
@@ -23,28 +20,9 @@ export default async function DashboardPage() {
     publishedPhotos,
     totalPhotos,
     activeServices,
-    quotedSum,
+    quotedAmountWon,
     leadsLast30,
-  ] = await Promise.all([
-    prisma.lead.count(),
-    prisma.lead.count({ where: { status: "new" } }),
-    prisma.lead.count({ where: { status: "won" } }),
-    prisma.lead.findMany({ orderBy: { createdAt: "desc" }, take: 6 }),
-    prisma.booking.findMany({
-      where: { scheduledFor: { gte: now }, status: { not: "cancelled" } },
-      orderBy: { scheduledFor: "asc" },
-      take: 5,
-      include: { service: { select: { name: true } } },
-    }),
-    prisma.galleryItem.count({ where: { published: true } }),
-    prisma.galleryItem.count(),
-    prisma.service.count({ where: { active: true } }),
-    prisma.lead.aggregate({
-      _sum: { quotedAmount: true },
-      where: { status: "won" },
-    }),
-    prisma.lead.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-  ]);
+  } = await getAdminDashboardData();
 
   const winRate = totalLeads > 0 ? Math.round((wonLeads / totalLeads) * 100) : 0;
 
@@ -78,7 +56,7 @@ export default async function DashboardPage() {
         />
         <StatCard
           label="Won work"
-          value={formatCurrency(quotedSum._sum.quotedAmount ?? 0)}
+          value={formatCurrency(quotedAmountWon)}
           sub={`${winRate}% win rate`}
           icon="check"
           tone="success"

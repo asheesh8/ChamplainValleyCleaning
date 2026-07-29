@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/admin/ui";
 import { ServiceForm } from "@/components/admin/ServiceForm";
 import { Icon } from "@/components/ui/Icon";
-import { prisma } from "@/lib/db";
+import { getAdminService } from "@/lib/admin-data";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const service = await prisma.service.findUnique({ where: { id } });
+  const service = await getAdminService(id);
   return { title: service ? `Edit ${service.name}` : "Service" };
 }
 
@@ -23,7 +23,7 @@ export default async function EditServicePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const service = await prisma.service.findUnique({ where: { id } });
+  const service = await getAdminService(id);
   if (!service) notFound();
 
   return (

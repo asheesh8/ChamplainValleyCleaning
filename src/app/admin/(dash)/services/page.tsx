@@ -7,7 +7,7 @@ import {
   deleteServiceAction,
   toggleServiceActiveAction,
 } from "@/app/admin/actions";
-import { prisma } from "@/lib/db";
+import { getAdminServices } from "@/lib/admin-data";
 import { priceLabel } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -15,9 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Services" };
 
 export default async function AdminServicesPage() {
-  const services = await prisma.service.findMany({
-    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
-  });
+  const services = await getAdminServices();
 
   return (
     <>

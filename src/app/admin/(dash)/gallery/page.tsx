@@ -10,7 +10,7 @@ import {
   toggleGalleryFlagAction,
   updateGalleryItemAction,
 } from "@/app/admin/actions";
-import { prisma } from "@/lib/db";
+import { getAdminGallery } from "@/lib/admin-data";
 import { galleryCategories } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
@@ -25,21 +25,7 @@ export default async function AdminGalleryPage({
 }) {
   const { filter = "all" } = await searchParams;
 
-  const where =
-    filter === "published"
-      ? { published: true }
-      : filter === "hidden"
-        ? { published: false }
-        : undefined;
-
-  const [items, total, published] = await Promise.all([
-    prisma.galleryItem.findMany({
-      where,
-      orderBy: [{ published: "desc" }, { sortOrder: "asc" }],
-    }),
-    prisma.galleryItem.count(),
-    prisma.galleryItem.count({ where: { published: true } }),
-  ]);
+  const { items, total, published } = await getAdminGallery(filter);
 
   const filters = [
     { key: "all", label: "All", count: total },

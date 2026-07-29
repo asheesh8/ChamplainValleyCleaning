@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getAdminNewLeadCount } from "@/lib/admin-data";
 import { AdminNav } from "@/components/admin/AdminNav";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export default async function DashLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const [user, newLeads] = await Promise.all([
     getCurrentUser(),
-    prisma.lead.count({ where: { status: "new" } }).catch(() => 0),
+    getAdminNewLeadCount(),
   ]);
 
   return (

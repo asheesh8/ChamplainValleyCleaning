@@ -28,13 +28,20 @@ export function isDatabaseConfigured(): boolean {
   return process.env.NODE_ENV !== "production" || Boolean(process.env.DATABASE_URL);
 }
 
-async function getPrisma() {
+export async function getPrisma() {
   if (!isDatabaseConfigured()) {
     throw new Error("DATABASE_URL is not configured");
   }
 
   const { prisma } = await import("@/lib/db");
   return prisma;
+}
+
+export async function withDatabase<T>(
+  query: (prisma: Awaited<ReturnType<typeof getPrisma>>) => Promise<T>,
+  fallback: T,
+): Promise<T> {
+  return safe(async () => query(await getPrisma()), fallback);
 }
 
 export async function dbAvailable(): Promise<boolean> {

@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { destroySession, requireUser } from "@/lib/auth";
+import { getPrisma } from "@/lib/data";
 import {
   bookingSchema,
   galleryUpdateSchema,
@@ -29,6 +29,7 @@ export async function logoutAction() {
 
 export async function updateLeadAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = String(formData.get("id"));
 
   const raw = {
@@ -53,6 +54,7 @@ export async function updateLeadAction(formData: FormData) {
 
 export async function addLeadNoteAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const leadId = String(formData.get("leadId"));
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
@@ -65,6 +67,7 @@ export async function addLeadNoteAction(formData: FormData) {
 
 export async function deleteLeadAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = String(formData.get("id"));
   await prisma.lead.delete({ where: { id } });
   revalidatePath("/admin/leads");
@@ -100,6 +103,7 @@ function servicePayload(formData: FormData) {
 
 export async function saveServiceAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = formData.get("id") ? String(formData.get("id")) : null;
 
   const parsed = serviceSchema.safeParse(servicePayload(formData));
@@ -126,6 +130,7 @@ export async function saveServiceAction(formData: FormData) {
 
 export async function deleteServiceAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   await prisma.service.delete({ where: { id: String(formData.get("id")) } });
   revalidatePath("/admin/services");
   revalidatePath("/services");
@@ -133,6 +138,7 @@ export async function deleteServiceAction(formData: FormData) {
 
 export async function toggleServiceActiveAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = String(formData.get("id"));
   const service = await prisma.service.findUnique({ where: { id } });
   if (!service) return;
@@ -149,6 +155,7 @@ export async function toggleServiceActiveAction(formData: FormData) {
 
 export async function updateGalleryItemAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = String(formData.get("id"));
 
   const parsed = galleryUpdateSchema.safeParse({
@@ -166,6 +173,7 @@ export async function updateGalleryItemAction(formData: FormData) {
 
 export async function toggleGalleryFlagAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = String(formData.get("id"));
   const flag = String(formData.get("flag")) as "published" | "featured";
   if (flag !== "published" && flag !== "featured") return;
@@ -185,6 +193,7 @@ export async function toggleGalleryFlagAction(formData: FormData) {
 
 export async function deleteGalleryItemAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   await prisma.galleryItem.delete({ where: { id: String(formData.get("id")) } });
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
@@ -194,6 +203,7 @@ export async function deleteGalleryItemAction(formData: FormData) {
 
 export async function saveTestimonialAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = formData.get("id") ? String(formData.get("id")) : null;
 
   const parsed = testimonialSchema.safeParse({
@@ -222,6 +232,7 @@ export async function saveTestimonialAction(formData: FormData) {
 
 export async function deleteTestimonialAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   await prisma.testimonial.delete({ where: { id: String(formData.get("id")) } });
   revalidatePath("/admin/testimonials");
   revalidatePath("/");
@@ -231,6 +242,7 @@ export async function deleteTestimonialAction(formData: FormData) {
 
 export async function saveBookingAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   const id = formData.get("id") ? String(formData.get("id")) : null;
 
   const parsed = bookingSchema.safeParse({
@@ -278,6 +290,7 @@ export async function saveBookingAction(formData: FormData) {
 
 export async function deleteBookingAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
   await prisma.booking.delete({ where: { id: String(formData.get("id")) } });
   revalidatePath("/admin/bookings");
   revalidatePath("/admin");
@@ -287,6 +300,7 @@ export async function deleteBookingAction(formData: FormData) {
 
 export async function saveSettingsAction(formData: FormData) {
   await requireUser();
+  const prisma = await getPrisma();
 
   const entries = Array.from(formData.entries()).filter(([k]) =>
     k.startsWith("setting:"),
@@ -308,6 +322,7 @@ export async function saveSettingsAction(formData: FormData) {
 /** Removes the demo leads seeded on first run. */
 export async function purgeSampleDataAction() {
   await requireUser();
+  const prisma = await getPrisma();
   await prisma.lead.deleteMany({ where: { source: "sample" } });
   revalidatePath("/admin/leads");
   revalidatePath("/admin");

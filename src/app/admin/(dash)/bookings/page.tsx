@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Label, Select, Textarea } from "@/components/ui/Field";
 import { deleteBookingAction, saveBookingAction } from "@/app/admin/actions";
-import { prisma } from "@/lib/db";
+import { getAdminBookings } from "@/lib/admin-data";
 import { bookingStatuses } from "@/lib/validation";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -13,26 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Schedule" };
 
 export default async function BookingsPage() {
-  const now = new Date();
-
-  const [upcoming, past, services] = await Promise.all([
-    prisma.booking.findMany({
-      where: { scheduledFor: { gte: now } },
-      orderBy: { scheduledFor: "asc" },
-      include: { service: { select: { name: true } } },
-    }),
-    prisma.booking.findMany({
-      where: { scheduledFor: { lt: now } },
-      orderBy: { scheduledFor: "desc" },
-      take: 25,
-      include: { service: { select: { name: true } } },
-    }),
-    prisma.service.findMany({
-      where: { active: true },
-      orderBy: { sortOrder: "asc" },
-      select: { id: true, name: true },
-    }),
-  ]);
+  const { upcoming, past, services } = await getAdminBookings();
 
   return (
     <>

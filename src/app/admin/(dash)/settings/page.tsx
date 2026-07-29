@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Label, Textarea } from "@/components/ui/Field";
 import { purgeSampleDataAction, saveSettingsAction } from "@/app/admin/actions";
-import { prisma } from "@/lib/db";
+import { getAdminSettings } from "@/lib/admin-data";
 import { site } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -18,10 +18,7 @@ const groupLabels: Record<string, { title: string; description: string }> = {
 };
 
 export default async function SettingsPage() {
-  const [settings, sampleCount] = await Promise.all([
-    prisma.siteSetting.findMany({ orderBy: { key: "asc" } }),
-    prisma.lead.count({ where: { source: "sample" } }),
-  ]);
+  const { settings, sampleCount } = await getAdminSettings();
 
   const grouped = settings.reduce<Record<string, typeof settings>>((acc, s) => {
     (acc[s.group] ??= []).push(s);

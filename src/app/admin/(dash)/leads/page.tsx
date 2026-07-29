@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageHeader, Panel, EmptyState, Th, Td } from "@/components/admin/ui";
 import { Badge, statusTone } from "@/components/ui/Badge";
-import { prisma } from "@/lib/db";
+import { getAdminLeads } from "@/lib/admin-data";
 import { leadStatuses } from "@/lib/validation";
 import { formatCurrency, relativeTime, cn } from "@/lib/utils";
 
@@ -16,14 +16,7 @@ export default async function LeadsPage({
 }) {
   const { status = "all" } = await searchParams;
 
-  const [leads, counts] = await Promise.all([
-    prisma.lead.findMany({
-      where: status !== "all" ? { status } : undefined,
-      orderBy: { createdAt: "desc" },
-      take: 200,
-    }),
-    prisma.lead.groupBy({ by: ["status"], _count: true }),
-  ]);
+  const { leads, counts } = await getAdminLeads(status);
 
   const countFor = (s: string) =>
     s === "all"

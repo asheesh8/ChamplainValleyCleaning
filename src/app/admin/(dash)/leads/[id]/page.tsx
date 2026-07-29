@@ -10,7 +10,7 @@ import {
   deleteLeadAction,
   updateLeadAction,
 } from "@/app/admin/actions";
-import { prisma } from "@/lib/db";
+import { getAdminLead, getAdminLeadMeta } from "@/lib/admin-data";
 import { leadStatuses } from "@/lib/validation";
 import { formatDateTime, relativeTime } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const lead = await prisma.lead.findUnique({ where: { id } });
+  const lead = await getAdminLeadMeta(id);
   return { title: lead ? `${lead.name} — Lead` : "Lead" };
 }
 
@@ -33,15 +33,7 @@ export default async function LeadDetailPage({
 }) {
   const { id } = await params;
 
-  const lead = await prisma.lead.findUnique({
-    where: { id },
-    include: {
-      notes: {
-        orderBy: { createdAt: "desc" },
-        include: { author: { select: { name: true } } },
-      },
-    },
-  });
+  const lead = await getAdminLead(id);
 
   if (!lead) notFound();
 
