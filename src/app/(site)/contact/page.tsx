@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { QuoteForm } from "@/components/site/QuoteForm";
 import { Icon } from "@/components/ui/Icon";
-import { prisma } from "@/lib/db";
+import { getServiceOptions } from "@/lib/data";
 import { site } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -14,11 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const services = await prisma.service.findMany({
-    where: { active: true },
-    orderBy: { sortOrder: "asc" },
-    select: { slug: true, name: true },
-  });
+  const services = await getServiceOptions();
 
   return (
     <>

@@ -29,8 +29,6 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => setOpen(false), [pathname]);
-
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -112,6 +110,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setOpen(false)}
                 className="rounded-field px-2 py-3 text-lg font-medium text-text transition-colors hover:bg-surface-2"
               >
                 {item.label}
@@ -120,12 +119,13 @@ export function Header() {
             <div className="mt-3 flex flex-col gap-2 border-t border-border-base pt-4">
               <a
                 href={site.phoneHref}
+                onClick={() => setOpen(false)}
                 className="inline-flex items-center gap-2 px-2 py-2 font-medium text-text"
               >
                 <Icon name="phone" className="size-4" />
                 {site.phone}
               </a>
-              <ButtonLink href="/contact" size="lg">
+              <ButtonLink href="/contact" size="lg" onClick={() => setOpen(false)}>
                 Get a free quote
               </ButtonLink>
             </div>

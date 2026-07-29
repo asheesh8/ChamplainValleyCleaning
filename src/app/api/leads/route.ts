@@ -1,7 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { prisma } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { isDatabaseConfigured } from "@/lib/data";
 import { leadCreateSchema } from "@/lib/validation";
+
+const databaseUnavailable = () =>
+  NextResponse.json(
+    {
+      error:
+        "Online quote requests are temporarily unavailable. Please call or email us directly.",
+    },
+    { status: 503 },
+  );
 
 /** Public: submit a quote request. */
 export async function POST(req: NextRequest) {
@@ -37,22 +45,31 @@ export async function POST(req: NextRequest) {
 
   const empty = (v: string | undefined) => (v === "" ? null : (v ?? null));
 
-  const lead = await prisma.lead.create({
-    data: {
-      name: data.name,
-      email: data.email,
-      phone: empty(data.phone),
-      company: empty(data.company),
-      propertyType: data.propertyType,
-      serviceSlug: empty(data.serviceSlug),
-      squareFeet: data.squareFeet ?? null,
-      frequency: empty(data.frequency),
-      preferredDate: empty(data.preferredDate),
-      message: empty(data.message),
-      source: data.source || "website",
-    },
-    select: { id: true, createdAt: true },
-  });
+  if (!isDatabaseConfigured()) return databaseUnavailable();
+
+  let lead: { id: string; createdAt: Date };
+  try {
+    const { prisma } = await import("@/lib/db");
+    lead = await prisma.lead.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: empty(data.phone),
+        company: empty(data.company),
+        propertyType: data.propertyType,
+        serviceSlug: empty(data.serviceSlug),
+        squareFeet: data.squareFeet ?? null,
+        frequency: empty(data.frequency),
+        preferredDate: empty(data.preferredDate),
+        message: empty(data.message),
+        source: data.source || "website",
+      },
+      select: { id: true, createdAt: true },
+    });
+  } catch (err) {
+    console.error("[leads] failed to create lead", err);
+    return databaseUnavailable();
+  }
 
   // TODO(notify): send the owner an email/SMS here. Nothing is wired to an
   // outbound provider yet — leads live in the database and the admin inbox.
@@ -62,17 +79,29 @@ export async function POST(req: NextRequest) {
 
 /** Admin: list leads, newest first. */
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isDatabaseConfigured()) return databaseUnavailable();
+
+  try {
+    const [{ getCurrentUser }, { prisma }] = await Promise.all([
+      import("@/lib/auth"),
+      import("@/lib/db"),
+    ]);
+
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const status = req.nextUrl.searchParams.get("status");
+    const leads = await prisma.lead.findMany({
+      where: status && status !== "all" ? { status } : undefined,
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
+
+    return NextResponse.json({ leads });
+  } catch (err) {
+    console.error("[leads] failed to list leads", err);
+    return databaseUnavailable();
   }
-
-  const status = req.nextUrl.searchParams.get("status");
-  const leads = await prisma.lead.findMany({
-    where: status && status !== "all" ? { status } : undefined,
-    orderBy: { createdAt: "desc" },
-    take: 200,
-  });
-
-  return NextResponse.json({ leads });
 }

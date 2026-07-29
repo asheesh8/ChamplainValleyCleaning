@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { prisma } from "@/lib/db";
+import { getPlacePhoto } from "@/lib/data";
 import { site } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -32,10 +32,7 @@ const values = [
 ];
 
 export default async function AboutPage() {
-  const photo = await prisma.galleryItem.findFirst({
-    where: { published: true, category: "place" },
-    orderBy: { sortOrder: "asc" },
-  });
+  const photo = await getPlacePhoto();
 
   return (
     <>

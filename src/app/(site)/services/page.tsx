@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { prisma } from "@/lib/db";
+import { getActiveServices } from "@/lib/data";
 import { site } from "@/lib/site";
 import { parseFeatures, priceLabel } from "@/lib/utils";
 
@@ -26,10 +26,7 @@ const categoryNotes: Record<string, string> = {
 };
 
 export default async function ServicesPage() {
-  const services = await prisma.service.findMany({
-    where: { active: true },
-    orderBy: { sortOrder: "asc" },
-  });
+  const services = await getActiveServices();
 
   const grouped = Object.entries(
     services.reduce<Record<string, typeof services>>((acc, s) => {

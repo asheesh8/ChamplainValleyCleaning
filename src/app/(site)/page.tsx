@@ -4,7 +4,11 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { ServiceCard } from "@/components/site/ServiceCard";
 import { MountainScene } from "@/components/site/MountainScene";
-import { prisma } from "@/lib/db";
+import {
+  getFeaturedServices,
+  getPublishedGallery,
+  getPublishedTestimonials,
+} from "@/lib/data";
 import { site } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -36,21 +40,9 @@ const steps = [
 
 export default async function HomePage() {
   const [featuredServices, heroPhotos, testimonials] = await Promise.all([
-    prisma.service.findMany({
-      where: { active: true, featured: true },
-      orderBy: { sortOrder: "asc" },
-      take: 4,
-    }),
-    prisma.galleryItem.findMany({
-      where: { published: true },
-      orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
-      take: 5,
-    }),
-    prisma.testimonial.findMany({
-      where: { published: true },
-      orderBy: { sortOrder: "asc" },
-      take: 3,
-    }),
+    getFeaturedServices(4),
+    getPublishedGallery(5),
+    getPublishedTestimonials(3),
   ]);
 
   const hero = heroPhotos[0];

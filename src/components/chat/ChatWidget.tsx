@@ -37,7 +37,6 @@ export function ChatWidget() {
 
   useEffect(() => {
     if (open) {
-      setUnread(false);
       const t = setTimeout(() => inputRef.current?.focus(), 250);
       return () => clearTimeout(t);
     }
@@ -70,12 +69,18 @@ export function ChatWidget() {
     respond(body);
   }
 
+  function toggleOpen() {
+    const next = !open;
+    setOpen(next);
+    if (next) setUnread(false);
+  }
+
   return (
     <>
       {/* Launcher */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggleOpen}
         aria-expanded={open}
         aria-controls="cvc-chat-panel"
         aria-label={open ? "Close chat" : "Open chat"}

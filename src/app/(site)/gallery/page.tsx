@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ButtonLink } from "@/components/ui/Button";
 import { GalleryGrid } from "@/components/site/GalleryGrid";
-import { prisma } from "@/lib/db";
+import { getPublishedGallery } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function GalleryPage() {
-  const photos = await prisma.galleryItem.findMany({
-    where: { published: true },
-    orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
-  });
+  const photos = await getPublishedGallery();
 
   return (
     <>
