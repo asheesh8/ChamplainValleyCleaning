@@ -6,6 +6,19 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · Prisma 7 · 
 
 ---
 
+**Live:** https://champlain-valley-cleaning.vercel.app
+
+### Environment variables
+
+Names only — see `.env.example`; never commit values.
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | SQLite file locally; a Postgres URL in production (switch the provider in `prisma/schema.prisma`) |
+| `ADMIN_EMAIL` | Labels the seeded owner row |
+
+> `/admin` currently has **no login** (preview build). Add authentication before the admin URL is shared outside the team.
+
 ## Run it
 
 ```bash
